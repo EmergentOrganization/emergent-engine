@@ -1,7 +1,7 @@
 package io.github.emergentorganization.engine.events;
 
 
-import com.emergentorganization.cellrpg.events.GameEvent;
+import  io.github.emergentorganization.cellrpg.events.GameEvent;
 
 public interface EventListener {
 

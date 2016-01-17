@@ -9,9 +9,9 @@ import io.github.emergentorganization.engine.components.Bounds;
 import io.github.emergentorganization.engine.components.InputComponent;
 import io.github.emergentorganization.engine.components.Position;
 import io.github.emergentorganization.engine.components.Velocity;
-import com.emergentorganization.cellrpg.core.entityfactory.EntityFactory;
-import com.emergentorganization.cellrpg.input.InputProcessor;
-import com.emergentorganization.cellrpg.input.player.PlayerInputProcessor;
+import io.github.emergentorganization.cellrpg.core.entityfactory.EntityFactory;
+import io.github.emergentorganization.cellrpg.input.InputProcessor;
+import io.github.emergentorganization.cellrpg.input.player.PlayerInputProcessor;
 
 import java.util.ArrayList;
 

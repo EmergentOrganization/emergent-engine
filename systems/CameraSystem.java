@@ -10,10 +10,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import io.github.emergentorganization.engine.components.Bounds;
 import io.github.emergentorganization.engine.components.CameraFollow;
 import io.github.emergentorganization.engine.components.Position;
-import com.emergentorganization.cellrpg.core.entityfactory.EntityFactory;
+import io.github.emergentorganization.cellrpg.core.entityfactory.EntityFactory;
 import io.github.emergentorganization.engine.events.EventListener;
-import com.emergentorganization.cellrpg.events.GameEvent;
-import com.emergentorganization.cellrpg.managers.EventManager;
+import io.github.emergentorganization.cellrpg.events.GameEvent;
+import io.github.emergentorganization.cellrpg.managers.EventManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

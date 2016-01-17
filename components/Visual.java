@@ -1,7 +1,7 @@
 package io.github.emergentorganization.engine.components;
 
 import com.artemis.Component;
-import com.emergentorganization.cellrpg.core.RenderIndex;
+import io.github.emergentorganization.cellrpg.core.RenderIndex;
 
 /**
  * This is used for both animation and static images.

@@ -7,8 +7,8 @@ import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.emergentorganization.cellrpg.components.*;
-import com.emergentorganization.cellrpg.managers.PhysicsSystem;
+import io.github.emergentorganization.cellrpg.components.*;
+import io.github.emergentorganization.cellrpg.managers.PhysicsSystem;
 import io.github.emergentorganization.engine.components.*;
 
 
