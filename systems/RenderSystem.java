@@ -16,8 +16,8 @@ import io.github.emergentorganization.engine.components.Position;
 import io.github.emergentorganization.engine.components.Rotation;
 import io.github.emergentorganization.engine.components.Scale;
 import io.github.emergentorganization.engine.components.Visual;
-import com.emergentorganization.cellrpg.managers.AssetManager;
-import com.emergentorganization.cellrpg.tools.postprocessing.TronShader;
+import io.github.emergentorganization.cellrpg.managers.AssetManager;
+import io.github.emergentorganization.cellrpg.tools.postprocessing.TronShader;
 
 import java.util.*;
 
