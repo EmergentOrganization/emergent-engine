@@ -1,4 +1,4 @@
-package io.github.emergentorganization.engine.events;
+package io.github.emergentorganization.emergent2dcore.events;
 
 
 import  io.github.emergentorganization.cellrpg.events.GameEvent;

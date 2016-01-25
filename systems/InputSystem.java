@@ -1,14 +1,14 @@
-package io.github.emergentorganization.engine.systems;
+package io.github.emergentorganization.emergent2dcore.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import io.github.emergentorganization.engine.components.Bounds;
-import io.github.emergentorganization.engine.components.InputComponent;
-import io.github.emergentorganization.engine.components.Position;
-import io.github.emergentorganization.engine.components.Velocity;
+import io.github.emergentorganization.emergent2dcore.components.Bounds;
+import io.github.emergentorganization.emergent2dcore.components.InputComponent;
+import io.github.emergentorganization.emergent2dcore.components.Position;
+import io.github.emergentorganization.emergent2dcore.components.Velocity;
 import io.github.emergentorganization.cellrpg.core.entityfactory.EntityFactory;
 import io.github.emergentorganization.cellrpg.input.InputProcessor;
 import io.github.emergentorganization.cellrpg.input.player.PlayerInputProcessor;

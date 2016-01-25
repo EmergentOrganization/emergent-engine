@@ -1,4 +1,4 @@
-package io.github.emergentorganization.engine.systems;
+package io.github.emergentorganization.emergent2dcore.systems;
 
 import com.artemis.Aspect;
 import com.artemis.BaseEntitySystem;
@@ -12,10 +12,10 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import io.github.emergentorganization.engine.components.Position;
-import io.github.emergentorganization.engine.components.Rotation;
-import io.github.emergentorganization.engine.components.Scale;
-import io.github.emergentorganization.engine.components.Visual;
+import io.github.emergentorganization.emergent2dcore.components.Position;
+import io.github.emergentorganization.emergent2dcore.components.Rotation;
+import io.github.emergentorganization.emergent2dcore.components.Scale;
+import io.github.emergentorganization.emergent2dcore.components.Visual;
 import io.github.emergentorganization.cellrpg.managers.AssetManager;
 import io.github.emergentorganization.cellrpg.tools.postprocessing.TronShader;
 

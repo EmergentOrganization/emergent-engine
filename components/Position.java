@@ -1,8 +1,8 @@
-package io.github.emergentorganization.engine.components;
+package io.github.emergentorganization.emergent2dcore.components;
 
 import com.artemis.Component;
 import com.badlogic.gdx.math.Vector2;
-import io.github.emergentorganization.engine.components.Bounds;
+import io.github.emergentorganization.emergent2dcore.components.Bounds;
 
 /**
  * defines position of an entity.

@@ -1,4 +1,4 @@
-package io.github.emergentorganization.engine;
+package io.github.emergentorganization.emergent2dcore;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;

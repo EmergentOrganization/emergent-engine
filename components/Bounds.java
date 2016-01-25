@@ -1,4 +1,4 @@
-package io.github.emergentorganization.engine.components;
+package io.github.emergentorganization.emergent2dcore.components;
 
 import com.artemis.Component;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;

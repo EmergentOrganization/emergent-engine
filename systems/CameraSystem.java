@@ -1,4 +1,4 @@
-package io.github.emergentorganization.engine.systems;
+package io.github.emergentorganization.emergent2dcore.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
@@ -7,11 +7,11 @@ import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import io.github.emergentorganization.engine.components.Bounds;
-import io.github.emergentorganization.engine.components.CameraFollow;
-import io.github.emergentorganization.engine.components.Position;
+import io.github.emergentorganization.emergent2dcore.components.Bounds;
+import io.github.emergentorganization.emergent2dcore.components.CameraFollow;
+import io.github.emergentorganization.emergent2dcore.components.Position;
 import io.github.emergentorganization.cellrpg.core.entityfactory.EntityFactory;
-import io.github.emergentorganization.engine.events.EventListener;
+import io.github.emergentorganization.emergent2dcore.events.EventListener;
 import io.github.emergentorganization.cellrpg.events.GameEvent;
 import io.github.emergentorganization.cellrpg.managers.EventManager;
 import org.apache.logging.log4j.LogManager;
