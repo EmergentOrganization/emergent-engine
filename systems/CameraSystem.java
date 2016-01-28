@@ -7,10 +7,12 @@ import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector2;
 import io.github.emergentorganization.emergent2dcore.components.Bounds;
 import io.github.emergentorganization.emergent2dcore.components.CameraFollow;
 import io.github.emergentorganization.emergent2dcore.components.Position;
 import io.github.emergentorganization.cellrpg.core.entityfactory.EntityFactory;
+import io.github.emergentorganization.emergent2dcore.components.Velocity;
 import io.github.emergentorganization.emergent2dcore.events.EventListener;
 import io.github.emergentorganization.cellrpg.events.GameEvent;
 import io.github.emergentorganization.cellrpg.managers.EventManager;
@@ -24,13 +26,20 @@ public class CameraSystem extends IteratingSystem {
 
     private ComponentMapper<Position> pm;
     private ComponentMapper<Bounds> bm;
+    private ComponentMapper<Velocity> velocity_m;
     private EventManager eventMan;
 
     private OrthographicCamera gameCamera;
     private boolean shouldFollow = true;
+    private long lastUpdate;
+
+    // camera behavior:
+    private static final float EDGE_MARGIN = 10*EntityFactory.SCALE_WORLD_TO_BOX;  // min px between player & screen edge
+    private static final float CLOSE_ENOUGH = 4*EntityFactory.SCALE_WORLD_TO_BOX;  // min distance between player & cam we care about (to reduce small-dist jitter & performance++)
+    private static final float CAMERA_LEAD = 20*EntityFactory.SCALE_WORLD_TO_BOX;  // dist camera should try to lead player movement
 
     public CameraSystem() {
-        super(Aspect.all(CameraFollow.class, Position.class));
+        super(Aspect.all(CameraFollow.class, Position.class, Bounds.class, Velocity.class));
         gameCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         gameCamera.zoom = EntityFactory.SCALE_WORLD_TO_BOX;
         gameCamera.lookAt(0, 0, 0);
@@ -50,6 +59,7 @@ public class CameraSystem extends IteratingSystem {
                 }
             }
         });
+        lastUpdate = System.currentTimeMillis();
     }
 
     private void camShake() {
@@ -69,11 +79,34 @@ public class CameraSystem extends IteratingSystem {
 
     private void camFollow(int followEntity) {
         if (shouldFollow) {
-            // TODO: Need to replace this with 7yl4rs version
             Position pc = pm.get(followEntity);
             Bounds b = bm.get(followEntity);
+            Velocity velocity = velocity_m.get(followEntity);
 
-            gameCamera.position.set(pc.position.x + (b.width / 2f), pc.position.y + (b.height / 2f), 0);
+//            gameCamera.position.set(pc.position.x + (b.width / 2f), pc.position.y + (b.height / 2f), 0);
+
+            long deltaTime = System.currentTimeMillis() - lastUpdate;
+            lastUpdate = System.currentTimeMillis();
+            float MAX_OFFSET = Math.min(gameCamera.viewportWidth, gameCamera.viewportHeight)/2-EDGE_MARGIN;  // max player-camera dist
+//            MAX_OFFSET*=EntityFactory.SCALE_WORLD_TO_BOX;
+            float PROPORTIONAL_GAIN = deltaTime * velocity.velocity.len() / MAX_OFFSET;
+//            PROPORTIONAL_GAIN *= EntityFactory.SCALE_WORLD_TO_BOX;
+
+            Vector2 pos = pc.getCenter(b,0);
+            Vector2 cameraLoc = new Vector2(gameCamera.position.x, gameCamera.position.y);
+
+            Vector2 offset = new Vector2(pos);
+            offset.sub(gameCamera.position.x, gameCamera.position.y);
+
+            offset.add(velocity.velocity.nor().scl(CAMERA_LEAD));
+
+            if (Math.abs(offset.x) > CLOSE_ENOUGH || Math.abs(offset.y) > CLOSE_ENOUGH) {
+                cameraLoc.add(offset.scl(PROPORTIONAL_GAIN));
+                gameCamera.position.set(cameraLoc, 0);
+//                gameCamera.update();
+//                logger.info("new camera pos:" + cameraLoc);
+            }
+
         }
     }
 
