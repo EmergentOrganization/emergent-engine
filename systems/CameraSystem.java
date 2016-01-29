@@ -4,10 +4,13 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.IteratingSystem;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
+import io.github.emergentorganization.cellrpg.tools.GameSettings;
 import io.github.emergentorganization.emergent2dcore.components.Bounds;
 import io.github.emergentorganization.emergent2dcore.components.CameraFollow;
 import io.github.emergentorganization.emergent2dcore.components.Position;
@@ -32,11 +35,6 @@ public class CameraSystem extends IteratingSystem {
     private OrthographicCamera gameCamera;
     private boolean shouldFollow = true;
     private long lastUpdate;
-
-    // camera behavior:
-    private static final float EDGE_MARGIN = 10*EntityFactory.SCALE_WORLD_TO_BOX;  // min px between player & screen edge
-    private static final float CLOSE_ENOUGH = 4*EntityFactory.SCALE_WORLD_TO_BOX;  // min distance between player & cam we care about (to reduce small-dist jitter & performance++)
-    private static final float CAMERA_LEAD = 20*EntityFactory.SCALE_WORLD_TO_BOX;  // dist camera should try to lead player movement
 
     public CameraSystem() {
         super(Aspect.all(CameraFollow.class, Position.class, Bounds.class, Velocity.class));
@@ -83,14 +81,21 @@ public class CameraSystem extends IteratingSystem {
             Bounds b = bm.get(followEntity);
             Velocity velocity = velocity_m.get(followEntity);
 
-//            gameCamera.position.set(pc.position.x + (b.width / 2f), pc.position.y + (b.height / 2f), 0);
-
-            long deltaTime = System.currentTimeMillis() - lastUpdate;
+            final long deltaTime = System.currentTimeMillis() - lastUpdate;
             lastUpdate = System.currentTimeMillis();
-            float MAX_OFFSET = Math.min(gameCamera.viewportWidth, gameCamera.viewportHeight)/2-EDGE_MARGIN;  // max player-camera dist
-//            MAX_OFFSET*=EntityFactory.SCALE_WORLD_TO_BOX;
-            float PROPORTIONAL_GAIN = deltaTime * velocity.velocity.len() / MAX_OFFSET;
-//            PROPORTIONAL_GAIN *= EntityFactory.SCALE_WORLD_TO_BOX;
+
+            // get camera settings:
+            Preferences prefs = GameSettings.getPreferences();
+            final float EDGE_MARGIN = prefs.getFloat(GameSettings.KEY_CAM_EDGE_MARGIN, 10)
+                    *EntityFactory.SCALE_WORLD_TO_BOX;
+            final float CLOSE_ENOUGH = prefs.getFloat(GameSettings.KEY_CAM_NEARNESS_CUTOFF, 4)
+                    *EntityFactory.SCALE_WORLD_TO_BOX;
+            final float CAMERA_LEAD = prefs.getFloat(GameSettings.KEY_CAM_LEAD, 20)
+                    *EntityFactory.SCALE_WORLD_TO_BOX;
+
+            // compute camera positioning:
+            final float MAX_OFFSET = Math.min(gameCamera.viewportWidth, gameCamera.viewportHeight)/2-EDGE_MARGIN;  // max player-camera dist
+            final float PROPORTIONAL_GAIN = deltaTime * velocity.velocity.len() / MAX_OFFSET;
 
             Vector2 pos = pc.getCenter(b,0);
             Vector2 cameraLoc = new Vector2(gameCamera.position.x, gameCamera.position.y);
@@ -103,7 +108,6 @@ public class CameraSystem extends IteratingSystem {
             if (Math.abs(offset.x) > CLOSE_ENOUGH || Math.abs(offset.y) > CLOSE_ENOUGH) {
                 cameraLoc.add(offset.scl(PROPORTIONAL_GAIN));
                 gameCamera.position.set(cameraLoc, 0);
-//                gameCamera.update();
 //                logger.info("new camera pos:" + cameraLoc);
             }
 
