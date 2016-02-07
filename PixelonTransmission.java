@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.GdxNativesLoader;
 import io.github.emergentorganization.cellrpg.scenes.Scene;
 import io.github.emergentorganization.cellrpg.scenes.SceneManager;
 import io.github.emergentorganization.cellrpg.tools.FileStructure;
+import io.github.emergentorganization.cellrpg.tools.GameSettings;
 import io.github.emergentorganization.cellrpg.tools.physics.BodyEditorLoader;
 import com.kotcrab.vis.ui.VisUI;
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +42,11 @@ public class PixelonTransmission extends Game {
     private BodyEditorLoader bodyLoader;
 
     public PixelonTransmission() {
-        System.setProperty("log4j.configurationFile", FileStructure.RESOURCE_DIR + "log4j2.xml");
+        String logFile = "log4j2.xml";
+        if (false){// TODO: use something like GameSettings.devMode()){
+            logFile = "log4j_debug.xml";
+        }
+        System.setProperty("log4j.configurationFile", FileStructure.RESOURCE_DIR + logFile);
         logger = LogManager.getLogger(getClass());
     }
 
