@@ -2,9 +2,11 @@ package io.github.emergentorganization.emergent2dcore.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.annotations.Profile;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import io.github.emergentorganization.cellrpg.tools.profiling.EmergentProfiler;
 import io.github.emergentorganization.emergent2dcore.components.Bounds;
 import io.github.emergentorganization.emergent2dcore.components.InputComponent;
 import io.github.emergentorganization.emergent2dcore.components.Position;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
  * manages all InputProcessors which convert user input into various game happenings (eg player movement)
  */
 @Wire
+@Profile(using=EmergentProfiler.class, enabled=true)
 public class InputSystem extends IteratingSystem {
 
     private static final int PLAYER_IN_PROC_INDEX = 0;  // careful not to add a processor and move this!

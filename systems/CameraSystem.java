@@ -2,6 +2,7 @@ package io.github.emergentorganization.emergent2dcore.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.annotations.Profile;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.Game;
@@ -11,6 +12,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import io.github.emergentorganization.cellrpg.tools.GameSettings;
+import io.github.emergentorganization.cellrpg.tools.profiling.EmergentProfiler;
 import io.github.emergentorganization.emergent2dcore.components.Bounds;
 import io.github.emergentorganization.emergent2dcore.components.CameraFollow;
 import io.github.emergentorganization.emergent2dcore.components.Position;
@@ -24,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 
 
 @Wire
+@Profile(using=EmergentProfiler.class, enabled=true)
 public class CameraSystem extends IteratingSystem {
     private final Logger logger = LogManager.getLogger(getClass());
 
@@ -110,7 +113,6 @@ public class CameraSystem extends IteratingSystem {
                 gameCamera.position.set(cameraLoc, 0);
 //                logger.info("new camera pos:" + cameraLoc);
             }
-
         }
     }
 

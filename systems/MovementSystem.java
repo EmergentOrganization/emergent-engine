@@ -2,6 +2,7 @@ package io.github.emergentorganization.emergent2dcore.systems;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.annotations.Profile;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
@@ -9,10 +10,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import io.github.emergentorganization.cellrpg.components.*;
 import io.github.emergentorganization.cellrpg.managers.PhysicsSystem;
+import io.github.emergentorganization.cellrpg.tools.profiling.EmergentProfiler;
 import io.github.emergentorganization.emergent2dcore.components.*;
 
 
 @Wire
+@Profile(using=EmergentProfiler.class, enabled=true)
 public class MovementSystem extends IteratingSystem {
 
     private ComponentMapper<Position> posMapper;

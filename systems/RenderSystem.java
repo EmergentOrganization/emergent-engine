@@ -3,6 +3,7 @@ package io.github.emergentorganization.emergent2dcore.systems;
 import com.artemis.Aspect;
 import com.artemis.BaseEntitySystem;
 import com.artemis.ComponentMapper;
+import com.artemis.annotations.Profile;
 import com.artemis.annotations.Wire;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import io.github.emergentorganization.cellrpg.tools.profiling.EmergentProfiler;
 import io.github.emergentorganization.emergent2dcore.components.Position;
 import io.github.emergentorganization.emergent2dcore.components.Rotation;
 import io.github.emergentorganization.emergent2dcore.components.Scale;
@@ -23,6 +25,7 @@ import java.util.*;
 
 
 @Wire
+@Profile(using=EmergentProfiler.class, enabled=true)
 public class RenderSystem extends BaseEntitySystem {
 
     private final TextureRegion fboRegion;

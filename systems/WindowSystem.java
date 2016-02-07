@@ -1,6 +1,7 @@
 package io.github.emergentorganization.emergent2dcore.systems;
 
 import com.artemis.BaseSystem;
+import com.artemis.annotations.Profile;
 import com.artemis.annotations.Wire;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -11,9 +12,11 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.emergentorganization.cellrpg.scenes.SceneManager;
 import io.github.emergentorganization.cellrpg.scenes.game.menu.pause.PauseWindow;
 import com.kotcrab.vis.ui.widget.VisWindow;
+import io.github.emergentorganization.cellrpg.tools.profiling.EmergentProfiler;
 
 
 @Wire
+@Profile(using=EmergentProfiler.class, enabled=true)
 public class WindowSystem extends BaseSystem {
     private final Stage stage;
     private final Batch gameBatch;
