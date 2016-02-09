@@ -78,14 +78,31 @@ public class CameraSystem extends IteratingSystem {
         shouldFollow = enabled;
     }
 
-    private void camFollow(int followEntity) {
+    private void camFollow(int followEntity){
+        int camfollowMethod = GameSettings.getPreferences().getInteger(GameSettings.KEY_CAM_FOLLOW_METHOD);
+        // TODO: switch-case to choose method
+        camFollow_simple(followEntity);
+        lastUpdate = System.currentTimeMillis();
+    }
+
+    private void camFollow_simple(int followEntity){
+        // stays exactly above the given entity. no frills, max performance.
+        Position pc = pm.get(followEntity);
+        Bounds b = bm.get(followEntity);
+        Velocity velocity = velocity_m.get(followEntity);
+
+        Vector2 pos = pc.getCenter(b,0);
+        gameCamera.position.set( pos, 0);
+    }
+
+    private void camFollow_leading(int followEntity) {
+        // follows given entity, attempts to lead the entity in the direction of travel
         if (shouldFollow) {
             Position pc = pm.get(followEntity);
             Bounds b = bm.get(followEntity);
             Velocity velocity = velocity_m.get(followEntity);
 
             final long deltaTime = System.currentTimeMillis() - lastUpdate;
-            lastUpdate = System.currentTimeMillis();
 
             // get camera settings:
             Preferences prefs = GameSettings.getPreferences();
@@ -96,9 +113,6 @@ public class CameraSystem extends IteratingSystem {
             final float CAMERA_LEAD = prefs.getFloat(GameSettings.KEY_CAM_LEAD, 20)
                     *EntityFactory.SCALE_WORLD_TO_BOX;
 
-            // compute camera positioning:
-            final float MAX_OFFSET = Math.min(gameCamera.viewportWidth, gameCamera.viewportHeight)/2-EDGE_MARGIN;  // max player-camera dist
-            final float PROPORTIONAL_GAIN = deltaTime * velocity.velocity.len() / MAX_OFFSET;
 
             Vector2 pos = pc.getCenter(b,0);
             Vector2 cameraLoc = new Vector2(gameCamera.position.x, gameCamera.position.y);
@@ -109,6 +123,10 @@ public class CameraSystem extends IteratingSystem {
             offset.add(velocity.velocity.nor().scl(CAMERA_LEAD));
 
             if (Math.abs(offset.x) > CLOSE_ENOUGH || Math.abs(offset.y) > CLOSE_ENOUGH) {
+                // compute camera positioning:
+                final float MAX_OFFSET = Math.min(gameCamera.viewportWidth, gameCamera.viewportHeight)/2-EDGE_MARGIN;  // max player-camera dist
+                final float PROPORTIONAL_GAIN = deltaTime * velocity.velocity.len() / MAX_OFFSET;
+
                 cameraLoc.add(offset.scl(PROPORTIONAL_GAIN));
                 gameCamera.position.set(cameraLoc, 0);
 //                logger.info("new camera pos:" + cameraLoc);

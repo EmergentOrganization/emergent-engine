@@ -11,7 +11,6 @@ import com.badlogic.gdx.utils.GdxNativesLoader;
 import io.github.emergentorganization.cellrpg.scenes.Scene;
 import io.github.emergentorganization.cellrpg.scenes.SceneManager;
 import io.github.emergentorganization.cellrpg.tools.FileStructure;
-import io.github.emergentorganization.cellrpg.tools.GameSettings;
 import io.github.emergentorganization.cellrpg.tools.physics.BodyEditorLoader;
 import com.kotcrab.vis.ui.VisUI;
 import org.apache.logging.log4j.LogManager;
@@ -75,6 +74,8 @@ public class PixelonTransmission extends Game {
 
         sceneManager = new SceneManager(this);
         sceneManager.setScene(Scene.MAIN_MENU);
+
+        logger.info("Game started");
     }
 
     public String loadVersion() {
@@ -120,6 +121,7 @@ public class PixelonTransmission extends Game {
     public void dispose() {
         assetManager.dispose();
         sceneManager.dispose();
+        logger.info("Game shutdown");
     }
 
     public String getVersion() {
