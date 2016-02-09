@@ -23,7 +23,7 @@ public class MusicSystem extends BaseSystem {
     private final Logger logger = LogManager.getLogger(getClass());
     private Sound[] loops;
     private Sound lastLoopHandle;
-    private Sound constantLoop;
+    private Sound[] constantLoops;
     private Sound currentLoop;
     private boolean queued = false;  // flag used to track if next set of loops has been queued yet
     private float playTime = 0f; // in seconds
@@ -51,8 +51,11 @@ public class MusicSystem extends BaseSystem {
     }
 
     public void start(AssetManager assetManager) {
-        constantLoop = soundEffects.get(SoundEffect.MUSIC_LOOP_PAD);
-        constantLoop.setLooping(constantLoop.play(), true);
+        constantLoops = new Sound[2];
+        constantLoops[0] = soundEffects.get(SoundEffect.MUSIC_LOOP_PAD);
+        constantLoops[1] = soundEffects.get(SoundEffect.MUSIC_LOOP_KEYS);
+        constantLoops[0].setLooping(constantLoops[0].play(), true);
+        constantLoops[1].setLooping(constantLoops[1].play(), true);
     }
 
     /**
@@ -70,19 +73,21 @@ public class MusicSystem extends BaseSystem {
     }
 
     public void step(float deltaTime) {
-        if (constantLoop != null){
-            playTime += deltaTime;
-            // manually loop the constantLoop (so we can drop in triggered tracks at appropriate time
-            // NOTE: this will break if deltaTime >= loop length (highly unlikely with long loops)
-            //if( ! constantLoop.isPlaying()) {  // if has stopped playing
-            if ( ! queued ){
-                // use Gdx.audio.newSound() instead of newMusic()? but files must be < 1MB
-                // TODO: load next loops
-                // TODO: set timed thread to start playing next loops @ end of these
-                float triggerTime = playTime % LOOP_DURATION;
-                System.out.println(triggerTime);
-                if (triggerTime <= 0.15f) { // Must be time to introduce a new loop layer?
-                    //queued = true; // ??
+        for (Sound constantLoop : constantLoops) {
+            if (constantLoop != null) {
+                playTime += deltaTime;
+                // manually loop the constantLoop (so we can drop in triggered tracks at appropriate time
+                // NOTE: this will break if deltaTime >= loop length (highly unlikely with long loops)
+                //if( ! constantLoop.isPlaying()) {  // if has stopped playing
+                if (!queued) {
+                    // use Gdx.audio.newSound() instead of newMusic()? but files must be < 1MB
+                    // TODO: load next loops
+                    // TODO: set timed thread to start playing next loops @ end of these
+                    float triggerTime = playTime % LOOP_DURATION;
+                    System.out.println(triggerTime);
+                    if (triggerTime <= 0.15f) { // Must be time to introduce a new loop layer?
+                        //queued = true; // ??
+                    }
                 }
             }
         }
@@ -115,7 +120,9 @@ public class MusicSystem extends BaseSystem {
     public void dispose() {
         if (currentLoop != null)
             currentLoop.dispose();
-        if (constantLoop != null)
-            constantLoop.dispose();
+        for (Sound constantLoop : constantLoops) {
+            if (constantLoop != null)
+                constantLoop.dispose();
+        }
     }
 }
