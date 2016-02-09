@@ -164,6 +164,7 @@ public class MusicSystem extends BaseSystem {
     private void prepNextLoopRound(){
         // preps next round of loops
         // TODO: load new loops
+        // TODO: number of loops should depend on MoodSystem.scoreIntensityLevelOutOf(loops.length)
 
         // TODO: queue loops for removal (if desired)
         prepped = true;
