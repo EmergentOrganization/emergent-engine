@@ -101,8 +101,8 @@ public class PixelonTransmission extends Game {
         String prefix = FileStructure.RESOURCE_DIR + "sounds/music/";
         String ext = ".ogg";
         String[] musics = {
-                "alwaysOn/Planiverse_Demo_Battle_Pad",
-                "alwaysOn/Planiverse_Demo_Battle_Keys"
+                "always_on/pad",
+                "always_on/keys"
         };
 
         for (String sound : musics) {
