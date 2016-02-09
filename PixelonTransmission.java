@@ -62,6 +62,7 @@ public class PixelonTransmission extends Game {
         assetManager = new AssetManager(new InternalFileHandleResolver());
         assetManager.load(ATLAS_PATH, TextureAtlas.class);
         loadSounds();
+        loadMusic();
         assetManager.finishLoading();
         textureAtlas = assetManager.get(ATLAS_PATH, TextureAtlas.class);
 
@@ -94,6 +95,19 @@ public class PixelonTransmission extends Game {
         }
 
         return null;
+    }
+
+    private void loadMusic(){
+        String prefix = FileStructure.RESOURCE_DIR + "sounds/music/";
+        String ext = ".ogg";
+        String[] musics = {
+                "alwaysOn/Planiverse_Demo_Battle_Pad",
+                "alwaysOn/Planiverse_Demo_Battle_Keys"
+        };
+
+        for (String sound : musics) {
+            assetManager.load(prefix + sound + ext, Sound.class);
+        }
     }
 
     private void loadSounds() {
