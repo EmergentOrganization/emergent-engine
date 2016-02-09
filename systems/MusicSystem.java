@@ -1,16 +1,15 @@
 package io.github.emergentorganization.emergent2dcore.systems;
 
 import com.artemis.BaseSystem;
-import com.badlogic.gdx.Files;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.files.FileHandle;
 import io.github.emergentorganization.cellrpg.core.SoundEffect;
 import io.github.emergentorganization.cellrpg.managers.AssetManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * System for handling music based on game events.
@@ -19,34 +18,47 @@ import java.util.Map;
  * https://github.com/EmergentOrganization/cell-rpg/blob/audioLayers/core/src/com/emergentorganization/cellrpg/sound/BgSoundController.java)
  */
 public class MusicSystem extends BaseSystem {
-    public static float LOOP_DURATION = 30.0f; // loops must be this length!
+    public static long LOOP_DURATION = 30 * 1000; // loops must be this length!
     private final Logger logger = LogManager.getLogger(getClass());
     private Sound[] loops;
     private Sound lastLoopHandle;
     private Sound[] constantLoops;
     private Sound currentLoop;
-    private boolean queued = false;  // flag used to track if next set of loops has been queued yet
-    private float playTime = 0f; // in seconds
+    private boolean prepped = false;  // flag used to track if next set of loops has been queued yet
+    private boolean scheduled = false;
     private Map<SoundEffect, Sound> soundEffects;
+    private long lastLoopTime;  // last time we looped around
 
     public MusicSystem(AssetManager assetManager) {
         soundEffects = assetManager.getSoundEffects();
         logger.info("MusicSystem init");
+
+//        FileHandle dir = Gdx.files.getFileHandle("sounds/arcade_30s_loops", Files.FileType.Internal);
+//        final FileHandle[] fileHandles = dir.list();
+//        loops = new Sound[fileHandles.length];
+//        for (FileHandle fileHandle : fileHandles) {
+//            //manager.load(fileHandle.path(), Sound.class);
+//        }
+//
+//        for (int i = 0; i < loops.length; i++) {
+//            FileHandle fileHandle = fileHandles[i];
+//            //loops[i] = manager.get(fileHandle.path(), Sound.class);
+//        }
+
         start(assetManager);
     }
 
     @Override
     public void processSystem(){
-        FileHandle dir = Gdx.files.getFileHandle("sounds/arcade_30s_loops", Files.FileType.Internal);
-        final FileHandle[] fileHandles = dir.list();
-        loops = new Sound[fileHandles.length];
-        for (FileHandle fileHandle : fileHandles) {
-            //manager.load(fileHandle.path(), Sound.class);
-        }
+        long deltaTime = System.currentTimeMillis() - lastLoopTime;
+        if (!scheduled && deltaTime > 25*1000){
+            // almost time to loop back around, schedule the reloop
+            scheduleNextLoop();
+        } else if (!prepped && deltaTime > 15*1000){
+            // halfway through the loop, prep next loop(s)
+            prepNextLoopRound();
+        } else {
 
-        for (int i = 0; i < loops.length; i++) {
-            FileHandle fileHandle = fileHandles[i];
-            //loops[i] = manager.get(fileHandle.path(), Sound.class);
         }
     }
 
@@ -54,8 +66,9 @@ public class MusicSystem extends BaseSystem {
         constantLoops = new Sound[2];
         constantLoops[0] = soundEffects.get(SoundEffect.MUSIC_LOOP_PAD);
         constantLoops[1] = soundEffects.get(SoundEffect.MUSIC_LOOP_KEYS);
-        constantLoops[0].setLooping(constantLoops[0].play(), true);
+        constantLoops[0].setLooping(constantLoops[0].play(), true);  // setLooping doesn't seem to work here...
         constantLoops[1].setLooping(constantLoops[1].play(), true);
+        lastLoopTime = System.currentTimeMillis();
     }
 
     /**
@@ -67,32 +80,6 @@ public class MusicSystem extends BaseSystem {
         currentLoop = null;
     }
 
-    public void startRandomLoops(){
-        // queues random loop to be added at next interval
-        // TODO:
-    }
-
-    public void step(float deltaTime) {
-        for (Sound constantLoop : constantLoops) {
-            if (constantLoop != null) {
-                playTime += deltaTime;
-                // manually loop the constantLoop (so we can drop in triggered tracks at appropriate time
-                // NOTE: this will break if deltaTime >= loop length (highly unlikely with long loops)
-                //if( ! constantLoop.isPlaying()) {  // if has stopped playing
-                if (!queued) {
-                    // use Gdx.audio.newSound() instead of newMusic()? but files must be < 1MB
-                    // TODO: load next loops
-                    // TODO: set timed thread to start playing next loops @ end of these
-                    float triggerTime = playTime % LOOP_DURATION;
-                    System.out.println(triggerTime);
-                    if (triggerTime <= 0.15f) { // Must be time to introduce a new loop layer?
-                        //queued = true; // ??
-                    }
-                }
-            }
-        }
-    }
-
     public void next() {
         if (currentLoop != null) {
             currentLoop.stop();
@@ -100,6 +87,45 @@ public class MusicSystem extends BaseSystem {
         }
         currentLoop = getRandomSound();
         currentLoop.play();
+    }
+
+    private void scheduleNextLoop() {
+        // schedules a new loop play
+        logger.info("scheduling next loop");
+        Timer time = new Timer();
+        time.schedule(new ReLoop(), lastLoopTime + LOOP_DURATION*1000);
+        scheduled = true;
+    }
+
+    class ReLoop extends TimerTask {
+        // used to manually loop the constantLoop (so we can drop in triggered tracks at appropriate time)
+        // NOTE: this will break if deltaTime >= loop length (highly unlikely with long loops)
+        public ReLoop() {
+
+        }
+
+        public void run() {
+            // loop constant loops
+            logger.info("looping da loops");
+            for (Sound constantLoop : constantLoops) {
+                constantLoop.play();
+            }
+
+            // TODO: remove loops queued for removal
+            // TODO: add loops queued for addition
+
+            // play other loops
+            for (Sound loop : loops){
+                if (loop != null) {
+                    // use Gdx.audio.newSound() instead of newMusic()? but files must be < 1MB
+                    logger.info("playing new loop");
+                }
+            }
+
+            lastLoopTime = System.currentTimeMillis();
+            prepped = false;
+            scheduled = false;
+        }
     }
 
     private Sound getRandomSound() {
@@ -112,6 +138,13 @@ public class MusicSystem extends BaseSystem {
             lastLoopHandle = loops[index];
 
         return loops[index];
+    }
+
+    private void prepNextLoopRound(){
+        // preps next round of loops
+        // TODO: load new loops
+        // TODO: queue loops for removal (if desired)
+        prepped = true;
     }
 
     /**
