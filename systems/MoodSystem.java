@@ -15,8 +15,8 @@ import java.util.EnumMap;
 public class MoodSystem extends BaseSystem {
     private final Logger logger = LogManager.getLogger(getClass());
 
-    public short intensity = 0;  // how fast-paced and action packed the current moment is.
-    private final short MAX_INTENSITY = 1000;
+    public int intensity = 0;  // how fast-paced and action packed the current moment is.
+    public static final int MAX_INTENSITY = 1000;
     // min: 0, max: 1000  (NOTE: max is not enforced, just assumed. going a little over shouldn't break anything.)
     // intensity should be boosted by things like explosions and spawning enemies, intensity decreases over time.
 
@@ -32,7 +32,6 @@ public class MoodSystem extends BaseSystem {
     }
 
     public MoodSystem(EventManager eventManager){
-
         // add listener for event effects
         eventManager.addListener(new EventListener() {
             @Override
@@ -43,7 +42,6 @@ public class MoodSystem extends BaseSystem {
             }
         });
     }
-
 
     @Override
     public void processSystem() {
@@ -59,10 +57,15 @@ public class MoodSystem extends BaseSystem {
         //       so that the presence of certain entities might influence the mood.
     }
 
-    public int scoreIntensityLevelOutOf(final short subdivisions){
+    public int scoreIntensityLevelOutOf(final int subdivisions){
         // returns current intensity level scored out of subdivisions
         // lowest: 1, highest: subdivisions
-        return (short) Math.round((float)intensity/MAX_INTENSITY * subdivisions);
+        int res = (short) Math.round((float)intensity/(float)MAX_INTENSITY * (float)subdivisions);
+        if (res > subdivisions){
+            res = subdivisions;
+        }
+        logger.debug("intensity level " + intensity + " scored as " + res + "/" + subdivisions);
+        return res;
     }
 
     private void intensityDecay(){

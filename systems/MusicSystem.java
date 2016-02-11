@@ -11,24 +11,30 @@ import io.github.emergentorganization.cellrpg.tools.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
 /**
  * System for handling music based on game events.
+ * uses Gdx.audio.newSound() instead of newMusic() to avoid streaming overhead but sound files must be < 1MB
  *
  * ported from BgSoundController:
  * https://github.com/EmergentOrganization/cell-rpg/blob/audioLayers/core/src/com/emergentorganization/cellrpg/sound/BgSoundController.java)
  */
 public class MusicSystem extends BaseSystem {
     public static long LOOP_DURATION = 30 * 1000; // loops must be this length!
+
     private final Logger logger = LogManager.getLogger(getClass());
-    private Sound[] loops;  // array of all loops we could use, preloaded in memory
-    private final FileHandle[] fileHandles;  // array of fileHandles for loops
+    private MoodSystem moodSystem;
     private AssetManager assetManager;
-    private Sound lastLoopHandle;
+
+    private final ArrayList<FileHandle> fileHandles = new ArrayList<FileHandle>();  // array of fileHandles for loops
     private Sound[] constantLoops;  // loops which play constantly
-    private Sound currentLoop;  // currently playing loop TODO: loops
+    private ArrayList<Sound> unusedLoops = new ArrayList<Sound>();
+    private ArrayList<Sound> currentLoops = new ArrayList<Sound>();  // currently playing loops
+    private ArrayList<Sound> loopsToRemove = new ArrayList<Sound>(); // loops queued for removal next round
     private long lastLoopTime;  // last time we looped around
 
     private boolean loaded = false;
@@ -36,15 +42,13 @@ public class MusicSystem extends BaseSystem {
     private boolean scheduled = false;
 
     public MusicSystem(AssetManager assetManager) {
-        this.assetManager = assetManager;
         logger.info("MusicSystem init");
 
         String loopDir = Resources.DIR_SOUNDS + "music/arcade_30s_loops";
-        FileHandle dir = Gdx.files.getFileHandle(loopDir, Files.FileType.Internal);
-        fileHandles = dir.list();
-        loops = new Sound[fileHandles.length];
-        for (FileHandle fileHandle : fileHandles) {
-            assetManager.gdxAssetManager.load(fileHandle.path(), Sound.class);
+        FileHandle dirs = Gdx.files.getFileHandle(loopDir, Files.FileType.Internal);
+        for (FileHandle dir : dirs.list()) {
+            fileHandles.add(dir);
+            assetManager.gdxAssetManager.load(dir.path(), Sound.class);
         }
 
         logger.info("music loops loading from " + loopDir);
@@ -55,7 +59,6 @@ public class MusicSystem extends BaseSystem {
     public void processSystem(){
         long deltaTime = System.currentTimeMillis() - lastLoopTime;
 
-
         if (!scheduled && deltaTime > 25*1000){
             // almost time to loop back around, schedule the reloop
             scheduleNextLoop();
@@ -63,19 +66,25 @@ public class MusicSystem extends BaseSystem {
             // halfway through the loop, prep next loop(s)
             prepNextLoopRound();
         } else if (!loaded && deltaTime > 2*1000){  // hopefully this is about enough time for loops to load
-            for (int i = 0; i < loops.length; i++) {
-                FileHandle fileHandle = fileHandles[i];
+            ArrayList<FileHandle> delQueue = new ArrayList<FileHandle>();  // delQueue to avoid concurrentMod
+            for (FileHandle fileHandle : fileHandles) {
                 if (assetManager.gdxAssetManager.isLoaded(fileHandle.path(), Sound.class)) {
-                    loops[i] = assetManager.gdxAssetManager.get(fileHandle.path(), Sound.class);
+                    logger.info("sound @" + fileHandle.path() + " loaded");
+                    unusedLoops.add(assetManager.gdxAssetManager.get(fileHandle.path(), Sound.class));
+                    delQueue.add(fileHandle);
                 } else {
-                    logger.info("music loop loading:" + fileHandle.path());
+                    logger.trace("loading " + fileHandle.path().split("/")[fileHandle.path().split("/").length-1]);
                     assetManager.gdxAssetManager.update();
-                    return;  // not loaded yet, check again next time
                 }
             }
-            // if we make it through the for loop without returning, all have loaded
-            loaded = true;
-            logger.info(fileHandles.length + " music loops loaded");
+            for (FileHandle fileHandle : delQueue) {  // process the delQueue
+                fileHandles.remove(fileHandle);
+            }
+
+            if (fileHandles.size() == 0) { // if  all have loaded
+                loaded = true;
+                logger.info(unusedLoops.size() + " music loops loaded");
+            }
         }
     }
 
@@ -92,18 +101,11 @@ public class MusicSystem extends BaseSystem {
      * Stops the current song and future iterations
      */
     public void stop() {
-        currentLoop.stop();
-        currentLoop.dispose();
-        currentLoop = null;
-    }
-
-    public void next() {
-        if (currentLoop != null) {
+        for (Sound currentLoop : currentLoops) {
             currentLoop.stop();
             currentLoop.dispose();
+            currentLoops.remove(currentLoop);
         }
-        currentLoop = getRandomSound();
-        currentLoop.play();
     }
 
     private void scheduleNextLoop() {
@@ -125,48 +127,74 @@ public class MusicSystem extends BaseSystem {
         public void run() {
             // loop constant loops
             logger.info("looping da loops");
-            try {
-                for (Sound constantLoop : constantLoops) {
-                    constantLoop.play();
+            if (prepped) {
+                try {
+                    for (Sound constantLoop : constantLoops) {
+                        if (constantLoop != null)
+                            constantLoop.play();
+                    }
+
+                    updateCurrentLoops();
+
+                    // play other loops
+                    for (Sound loop : currentLoops) {
+                        if (loop != null) {
+                            loop.play();
+                        }
+                    }
+                } finally {
+                    lastLoopTime = System.currentTimeMillis();
+                    prepped = false;
+                    scheduled = false;
                 }
-
-                next();  // TODO: instead of this:
-                // TODO: remove loops queued for removal
-                // TODO: add loops queued for addition
-
-                // play other loops
-//                for (Sound loop : currentLoops) {
-//                    if (loop != null) {
-//                        // use Gdx.audio.newSound() instead of newMusic()? but files must be < 1MB
-//                        logger.info("playing new loop");
-//                    }
-//                }
-            } finally {
-                lastLoopTime = System.currentTimeMillis();
-                prepped = false;
-                scheduled = false;
             }
         }
     }
 
     private Sound getRandomSound() {
-        int index = (int) Math.max(0, Math.floor((Math.random() * loops.length) - 1));
+        int index = (int) Math.max(0, Math.floor((Math.random() * unusedLoops.size()) - 1));
+        return unusedLoops.get(index);
+    }
 
-        // Don't play the same song twice in a row
-        if (lastLoopHandle == loops[index])
-            index = (int) Math.max(0, Math.floor((Math.random() * loops.length) - 1));
-        else
-            lastLoopHandle = loops[index];
-
-        return loops[index];
+    private void updateCurrentLoops(){
+        // executes the planned changes to currentLoops
+        // remove loops queued for removal
+        for (Sound loop : loopsToRemove){
+            currentLoops.remove(loop);
+            unusedLoops.add(loop);
+        }
+        // loops are not queued for addition, they are added (but not played)immediately
     }
 
     private void prepNextLoopRound(){
         // preps next round of loops
-        // TODO: load new loops
-        // TODO: number of loops should depend on MoodSystem.scoreIntensityLevelOutOf(loops.length)
+        logger.debug("prepping next round of loops");
+        // number of loops desired:
+        int numberOfLoops = moodSystem.scoreIntensityLevelOutOf((short) (currentLoops.size() + unusedLoops.size()));
+        numberOfLoops += 1; // we want 1 optional loop at minimum
+        logger.debug("current # loops:" + currentLoops.size());
+        logger.debug("desired # loops:" + numberOfLoops);
 
-        // TODO: queue loops for removal (if desired)
+        // swap out a loops to add random variation
+        if (currentLoops.size() > 0 && unusedLoops.size() > 0) {
+            int randomCurrentLoopIndex = (int) Math.max(0, Math.floor((Math.random() * currentLoops.size()) - 1));
+            loopsToRemove.add(currentLoops.get(randomCurrentLoopIndex));
+            int randomUnusedLoopIndex = (int) Math.max(0, Math.floor((Math.random() * unusedLoops.size()) - 1));
+            currentLoops.add(unusedLoops.get(randomUnusedLoopIndex));
+        }
+
+        while (numberOfLoops < currentLoops.size() - loopsToRemove.size()
+                && loopsToRemove.size() != currentLoops.size()){
+            // queue loops for removal
+            loopsToRemove.add(currentLoops.get(loopsToRemove.size()));
+        }
+
+        while(numberOfLoops > currentLoops.size() && unusedLoops.size() > 0){
+            // add loops
+            Sound newSound = getRandomSound();
+            currentLoops.add(newSound);
+            unusedLoops.remove(newSound);
+        }
         prepped = true;
     }
 
@@ -174,11 +202,24 @@ public class MusicSystem extends BaseSystem {
      * Disposes at the end of the CellRPG lifecycle. Do not dispose on scene change -- see {@link MusicSystem#stop}
      */
     public void dispose() {
-        if (currentLoop != null)
+        // set these to try to help other threads stop:
+        scheduled = true;
+        prepped = false;
+        loaded = false;
+
+        for (Sound currentLoop : currentLoops) {
             currentLoop.dispose();
+        }
+        for (Sound unusedLoop : unusedLoops){
+            unusedLoop.dispose();
+        }
         for (Sound constantLoop : constantLoops) {
             if (constantLoop != null)
                 constantLoop.dispose();
+        }
+
+        for (Sound loop : loopsToRemove){
+            loop.dispose();
         }
     }
 
