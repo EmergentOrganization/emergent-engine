@@ -2,6 +2,7 @@ package io.github.emergentorganization.emergent2dcore.systems;
 
 import com.artemis.BaseSystem;
 import io.github.emergentorganization.cellrpg.core.Tags;
+import io.github.emergentorganization.cellrpg.events.EntityEvent;
 import io.github.emergentorganization.cellrpg.events.GameEvent;
 import io.github.emergentorganization.cellrpg.managers.EventManager;
 import io.github.emergentorganization.cellrpg.systems.CASystems.CAs.CA;
@@ -43,9 +44,9 @@ public class MoodSystem extends BaseSystem {
         // add listener for event effects
         eventManager.addListener(new EventListener() {
             @Override
-            public void notify(GameEvent event) {
-                if (EVENT_INTENSITY_MAP.get(event) != null) {
-                    intensity += EVENT_INTENSITY_MAP.get(event);
+            public void notify(EntityEvent event) {
+                if (EVENT_INTENSITY_MAP.get(event.event) != null) {
+                    intensity += EVENT_INTENSITY_MAP.get(event.event);
                 }
             }
         });

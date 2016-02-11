@@ -1,10 +1,10 @@
 package io.github.emergentorganization.emergent2dcore.events;
 
-
-import  io.github.emergentorganization.cellrpg.events.GameEvent;
+import io.github.emergentorganization.cellrpg.events.EntityEvent;
 
 public interface EventListener {
 
-    void notify(GameEvent event);
+    void notify(EntityEvent event);
+    // notifies listening object of an event
 
 }

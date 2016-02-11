@@ -10,6 +10,7 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
+import io.github.emergentorganization.cellrpg.events.EntityEvent;
 import io.github.emergentorganization.cellrpg.tools.GameSettings;
 import io.github.emergentorganization.cellrpg.tools.profiling.EmergentProfiler;
 import io.github.emergentorganization.emergent2dcore.components.Bounds;
@@ -51,8 +52,8 @@ public class CameraSystem extends IteratingSystem {
         super.initialize();
         eventMan.addListener(new EventListener() {
             @Override
-            public void notify(GameEvent event) {
-                switch (event) {
+            public void notify(EntityEvent event) {
+                switch (event.event) {
                     case PLAYER_HIT:
                         camShake();
                         break;
