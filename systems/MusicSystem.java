@@ -42,7 +42,7 @@ public class MusicSystem extends BaseSystem {
     private boolean scheduled = false;
 
     public MusicSystem(AssetManager assetManager) {
-        logger.info("MusicSystem init");
+        logger.trace("MusicSystem init");
 
         String loopDir = Resources.DIR_SOUNDS + "music/arcade_30s_loops";
         FileHandle dirs = Gdx.files.getFileHandle(loopDir, Files.FileType.Internal);
@@ -69,7 +69,7 @@ public class MusicSystem extends BaseSystem {
             ArrayList<FileHandle> delQueue = new ArrayList<FileHandle>();  // delQueue to avoid concurrentMod
             for (FileHandle fileHandle : fileHandles) {
                 if (assetManager.gdxAssetManager.isLoaded(fileHandle.path(), Sound.class)) {
-                    logger.info("sound @" + fileHandle.path() + " loaded");
+                    logger.debug("sound @" + fileHandle.path() + " loaded");
                     unusedLoops.add(assetManager.gdxAssetManager.get(fileHandle.path(), Sound.class));
                     delQueue.add(fileHandle);
                 } else {
@@ -110,10 +110,10 @@ public class MusicSystem extends BaseSystem {
 
     private void scheduleNextLoop() {
         // schedules a new loop play
-        logger.info("scheduling next loop");
+        logger.debug("scheduling next music loop");
         Timer time = new Timer();
         time.schedule(new ReLoop(), getTimeOfNextMeasure());
-        logger.info("schedule in " + getTimeOfNextMeasure());
+        logger.debug("schedule in " + getTimeOfNextMeasure());
         scheduled = true;
     }
 
@@ -126,7 +126,7 @@ public class MusicSystem extends BaseSystem {
 
         public void run() {
             // loop constant loops
-            logger.info("looping da loops");
+            logger.debug("looping da loops");
             if (prepped) {
                 try {
                     for (Sound constantLoop : constantLoops) {
