@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -20,6 +21,8 @@ import io.github.emergentorganization.emergent2dcore.components.Scale;
 import io.github.emergentorganization.emergent2dcore.components.Visual;
 import io.github.emergentorganization.cellrpg.managers.AssetManager;
 import io.github.emergentorganization.cellrpg.tools.postprocessing.TronShader;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -27,6 +30,7 @@ import java.util.*;
 @Wire
 @Profile(using=EmergentProfiler.class, enabled=true)
 public class RenderSystem extends BaseEntitySystem {
+    private final Logger logger = LogManager.getLogger(getClass());
 
     private final TextureRegion fboRegion;
     private final FrameBuffer frameBuffer;
@@ -42,8 +46,11 @@ public class RenderSystem extends BaseEntitySystem {
     private boolean tronShaderEnabled = false;
     private Batch outBatch;
 
+    // list of particleEffects with no parent entity
+    private ArrayList<ParticleEffect> particleEffects = new ArrayList<ParticleEffect>();
+
     public RenderSystem(SpriteBatch batch) {
-        super(Aspect.all(Position.class, Rotation.class, Scale.class, Visual.class));
+        super(Aspect.all(Position.class, Rotation.class, Scale.class, Visual.class));  // TODO: .one(Visual.class, Particles.class)
 
         this.batch = batch;
         this.outBatch = new SpriteBatch();
@@ -52,6 +59,11 @@ public class RenderSystem extends BaseEntitySystem {
         Texture cb = frameBuffer.getColorBufferTexture();
         fboRegion = new TextureRegion(cb, 0, 0, cb.getWidth(), cb.getHeight());
         fboRegion.flip(false, true); // FBO uses lower left, TextureRegion uses upper-left
+    }
+
+    public void registerOrphanParticleEffect(ParticleEffect effect){
+        // registers an (entity-parent)-less particle effect for drawing
+        particleEffects.add(effect);
     }
 
     @Override
@@ -64,8 +76,28 @@ public class RenderSystem extends BaseEntitySystem {
 
     @Override
     protected void processSystem() {
+        logger.trace("render dt: " + world.getDelta());
+
+        // render entities:
         for (Integer id : sortedEntityIds) {
             process(id);
+        }
+
+        // render non-entity particle effects:
+        ArrayList<ParticleEffect> delQueue = new ArrayList<ParticleEffect>();
+        logger.debug("rendering " + particleEffects.size() + " orphan particle effects");
+        for (ParticleEffect p : particleEffects){
+            if(p.isComplete()){
+                p.dispose();
+                delQueue.add(p);
+            } else {
+                p.update(world.getDelta());
+                p.draw(batch);
+            }
+        }
+        logger.trace(delQueue.size() + " particle effects complete; removing.");
+        for (ParticleEffect dp : delQueue){
+            particleEffects.remove(dp);
         }
     }
 
