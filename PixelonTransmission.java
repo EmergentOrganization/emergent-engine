@@ -42,9 +42,6 @@ public class PixelonTransmission extends Game {
 
     public PixelonTransmission() {
         String logFile = "log4j2.xml";
-        if (false){// TODO: use something like GameSettings.devMode()){
-            logFile = "log4j_debug.xml";
-        }
         System.setProperty("log4j.configurationFile", FileStructure.RESOURCE_DIR + logFile);
         logger = LogManager.getLogger(getClass());
     }
