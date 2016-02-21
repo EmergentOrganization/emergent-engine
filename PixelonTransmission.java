@@ -1,7 +1,6 @@
 package io.github.emergentorganization.emergent2dcore;
 
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.audio.Sound;
@@ -11,6 +10,7 @@ import com.badlogic.gdx.utils.GdxNativesLoader;
 import io.github.emergentorganization.cellrpg.scenes.Scene;
 import io.github.emergentorganization.cellrpg.scenes.SceneManager;
 import io.github.emergentorganization.cellrpg.tools.FileStructure;
+import io.github.emergentorganization.cellrpg.tools.GameSettings;
 import io.github.emergentorganization.cellrpg.tools.physics.BodyEditorLoader;
 import com.kotcrab.vis.ui.VisUI;
 import org.apache.logging.log4j.LogManager;
@@ -48,6 +48,23 @@ public class PixelonTransmission extends Game {
 
     @Override
     public void create() {
+
+        if(Gdx.app.getType() == Application.ApplicationType.Desktop){
+            System.out.println("fetching settings...");
+
+            Preferences prefs = GameSettings.getPreferences();
+            Graphics.DisplayMode desktop = Gdx.graphics.getDesktopDisplayMode();
+
+            int w = prefs.getInteger(GameSettings.KEY_GRAPHICS_WIDTH, desktop.width);
+            int h = prefs.getInteger(GameSettings.KEY_GRAPHICS_HEIGHT, desktop.height);
+            boolean fs = prefs.getBoolean(GameSettings.KEY_GRAPHICS_FULLSCREEN, false);
+            System.out.println("Resizing: " + w + ", " + h + ". Fullscreen: " + fs);
+            Gdx.graphics.setDisplayMode(
+                   w, h, fs
+            );
+        }
+
+
         this.fileStructure = new FileStructure();
         if (fileStructure.isJar()) {
             fileStructure.unpackAssets();
