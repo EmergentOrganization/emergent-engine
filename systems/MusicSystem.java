@@ -7,11 +7,11 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import io.github.emergentorganization.cellrpg.core.SoundEffect;
 import io.github.emergentorganization.cellrpg.managers.AssetManager;
+import io.github.emergentorganization.cellrpg.systems.TimingSystem;
 import io.github.emergentorganization.cellrpg.tools.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,18 +24,16 @@ import java.util.TimerTask;
  * https://github.com/EmergentOrganization/cell-rpg/blob/audioLayers/core/src/com/emergentorganization/cellrpg/sound/BgSoundController.java)
  */
 public class MusicSystem extends BaseSystem {
-    public static long LOOP_DURATION = 30 * 1000; // loops must be this length!
-
     private final Logger logger = LogManager.getLogger(getClass());
     private MoodSystem moodSystem;
     private AssetManager assetManager;
+    private TimingSystem timingSystem;
 
     private final ArrayList<FileHandle> fileHandles = new ArrayList<FileHandle>();  // array of fileHandles for loops
     private Sound[] constantLoops;  // loops which play constantly
     private ArrayList<Sound> unusedLoops = new ArrayList<Sound>();
     private ArrayList<Sound> currentLoops = new ArrayList<Sound>();  // currently playing loops
     private ArrayList<Sound> loopsToRemove = new ArrayList<Sound>(); // loops queued for removal next round
-    private long lastLoopTime;  // last time we looped around
 
     private boolean loaded = false;
     private boolean prepped = false;  // flag used to track if next set of loops has been queued yet
@@ -57,7 +55,7 @@ public class MusicSystem extends BaseSystem {
 
     @Override
     public void processSystem(){
-        long deltaTime = System.currentTimeMillis() - lastLoopTime;
+        long deltaTime = timingSystem.getTimeSinceLastMeasure();
 
         if (!scheduled && deltaTime > 25*1000){
             // almost time to loop back around, schedule the reloop
@@ -94,7 +92,6 @@ public class MusicSystem extends BaseSystem {
         constantLoops[1] = assetManager.getSoundEffects().get(SoundEffect.MUSIC_LOOP_KEYS);
         constantLoops[0].setLooping(constantLoops[0].play(), false);
         constantLoops[1].setLooping(constantLoops[1].play(), false);
-        lastLoopTime = System.currentTimeMillis();
     }
 
     /**
@@ -112,8 +109,8 @@ public class MusicSystem extends BaseSystem {
         // schedules a new loop play
         logger.debug("scheduling next music loop");
         Timer time = new Timer();
-        time.schedule(new ReLoop(), getTimeOfNextMeasure());
-        logger.debug("schedule in " + getTimeOfNextMeasure());
+        time.schedule(new ReLoop(), timingSystem.getTimeToNextMeasure());
+        logger.debug("schedule in " + timingSystem.getTimeToNextMeasure());
         scheduled = true;
     }
 
@@ -143,7 +140,6 @@ public class MusicSystem extends BaseSystem {
                         }
                     }
                 } finally {
-                    lastLoopTime = System.currentTimeMillis();
                     prepped = false;
                     scheduled = false;
                 }
@@ -223,7 +219,5 @@ public class MusicSystem extends BaseSystem {
         }
     }
 
-    private long getTimeOfNextMeasure(){
-        return (lastLoopTime + LOOP_DURATION) - System.currentTimeMillis();
-    }
+
 }

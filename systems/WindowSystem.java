@@ -64,7 +64,7 @@ public class WindowSystem extends BaseSystem {
         }
     }
 
-    private void onPause() {
+    public void onPause() {
         isPaused = true;
         this.framebufferTexture = ScreenUtils.getFrameBufferTexture(); // cache frame to prevent double-buffer flickering
         enableSystems(false);
@@ -73,7 +73,7 @@ public class WindowSystem extends BaseSystem {
         stage.addActor(pauseWindow.fadeIn());
     }
 
-    private void onResume() {
+    public void onResume() {
         isPaused = false;
         enableSystems(true);
         pauseWindow.fadeOut();
