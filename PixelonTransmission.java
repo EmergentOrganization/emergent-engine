@@ -9,10 +9,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.GdxNativesLoader;
 import io.github.emergentorganization.cellrpg.scenes.Scene;
 import io.github.emergentorganization.cellrpg.scenes.SceneManager;
+import io.github.emergentorganization.cellrpg.scenes.game.menu.pause.GraphicsSettingsMenu;
 import io.github.emergentorganization.cellrpg.tools.FileStructure;
 import io.github.emergentorganization.cellrpg.tools.GameSettings;
 import io.github.emergentorganization.cellrpg.tools.physics.BodyEditorLoader;
 import com.kotcrab.vis.ui.VisUI;
+import it.uniroma1.dis.wsngroup.gexf4j.core.Graph;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,22 +51,24 @@ public class PixelonTransmission extends Game {
     @Override
     public void create() {
 
-        if(Gdx.app.getType() == Application.ApplicationType.Desktop){
-            System.out.println("fetching settings...");
-
-            Preferences prefs = GameSettings.getPreferences();
-            Graphics.DisplayMode desktop = Gdx.graphics.getDesktopDisplayMode();
-
-            int w = prefs.getInteger(GameSettings.KEY_GRAPHICS_WIDTH, desktop.width);
-            int h = prefs.getInteger(GameSettings.KEY_GRAPHICS_HEIGHT, desktop.height);
-            boolean fs = prefs.getBoolean(GameSettings.KEY_GRAPHICS_FULLSCREEN, false);
-            System.out.println("Resizing: " + w + ", " + h + ". Fullscreen: " + fs);
-            Gdx.graphics.setDisplayMode(
-                   w, h, fs
-            );
+        // init graphics settings
+        Preferences prefs = GameSettings.getPreferences();
+        int w,h;
+        try {
+            w = prefs.getInteger(GameSettings.KEY_GRAPHICS_WIDTH, GraphicsSettingsMenu.getDefaultW());
+            h = prefs.getInteger(GameSettings.KEY_GRAPHICS_HEIGHT, GraphicsSettingsMenu.getDefaultH());
+        } catch(NumberFormatException ex){  // TODO: libgdx fix: LwjglPreferences should do this automatically, right?
+            logger.error("corrupted screen size preferences. cannot parse integers" + ex.getMessage());
+            w = GraphicsSettingsMenu.getDefaultW();
+            h = GraphicsSettingsMenu.getDefaultH();
+            prefs.putInteger(GameSettings.KEY_GRAPHICS_WIDTH, w);
+            prefs.putInteger(GameSettings.KEY_GRAPHICS_HEIGHT, h);
         }
+        boolean fs = prefs.getBoolean(GameSettings.KEY_GRAPHICS_FULLSCREEN, GraphicsSettingsMenu.FULLSCREEN_DEFAULT);
+        logger.debug("Resizing: " + w + ", " + h + ". Fullscreen: " + fs);
+        Gdx.graphics.setDisplayMode(w, h, fs);
 
-
+        // init file structure
         this.fileStructure = new FileStructure();
         if (fileStructure.isJar()) {
             fileStructure.unpackAssets();
