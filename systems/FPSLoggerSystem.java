@@ -46,7 +46,7 @@ public class FPSLoggerSystem extends BaseSystem {
                     dateFormat.format(new Date()) + ',' + Gdx.graphics.getFramesPerSecond() + '\n'
             );
         } catch (IOException ex) {
-            logger.error("FPSLog write exception: " + ex.getMessage());
+            logger.error("FPSLog write exception: ", ex);
         } finally {
             try {writer.close();} catch (Exception ex) {/*ignore*/}
         }

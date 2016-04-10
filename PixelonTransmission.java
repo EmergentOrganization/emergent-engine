@@ -58,7 +58,7 @@ public class PixelonTransmission extends Game {
             w = prefs.getInteger(GameSettings.KEY_GRAPHICS_WIDTH, GraphicsSettingsMenu.getDefaultW());
             h = prefs.getInteger(GameSettings.KEY_GRAPHICS_HEIGHT, GraphicsSettingsMenu.getDefaultH());
         } catch(NumberFormatException ex){  // TODO: libgdx fix: LwjglPreferences should do this automatically, right?
-            logger.error("corrupted screen size preferences. cannot parse integers" + ex.getMessage());
+            logger.error("corrupted screen size preferences. cannot parse integers", ex);
             w = GraphicsSettingsMenu.getDefaultW();
             h = GraphicsSettingsMenu.getDefaultH();
             prefs.putInteger(GameSettings.KEY_GRAPHICS_WIDTH, w);

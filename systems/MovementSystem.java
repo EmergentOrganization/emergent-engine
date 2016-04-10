@@ -73,7 +73,7 @@ public class MovementSystem extends IteratingSystem {
 
     private void processPhysicsMovement(Body body, InputComponent ic, Position pc, Velocity vc, Rotation rc, int id) {
         if (body == null){
-            logger.error("ERR: cannot process movement; body == null");
+            logger.error("ERR: cannot process movement for ent#" + id + "; body == null");
             lifeCycleMapper.get(id).kill();
             return;
         }
