@@ -27,6 +27,7 @@ public class MovementSystem extends IteratingSystem {
     private ComponentMapper<Rotation> rotMapper;
     private ComponentMapper<Equipment> equipMapper;
     private ComponentMapper<Bounds> boundsMapper;
+    private ComponentMapper<Lifecycle> lifeCycleMapper;
 
     private final Logger logger = LogManager.getLogger(getClass());
 
@@ -43,7 +44,7 @@ public class MovementSystem extends IteratingSystem {
         if (physMapper.has(entityId)) {
             Body body = world.getSystem(PhysicsSystem.class).getBody(entityId);
             if (inputMapper.has(entityId)) { // control physics body by input
-                processPhysicsMovement(body, inputMapper.get(entityId), p, v, r);
+                processPhysicsMovement(body, inputMapper.get(entityId), p, v, r, entityId);
             } else { // keep image with body for when physics is acting upon it
                 p.position.set(body.getPosition());
                 r.angle = MathUtils.radiansToDegrees * body.getAngle();
@@ -70,9 +71,10 @@ public class MovementSystem extends IteratingSystem {
         }
     }
 
-    private void processPhysicsMovement(Body body, InputComponent ic, Position pc, Velocity vc, Rotation rc) {
+    private void processPhysicsMovement(Body body, InputComponent ic, Position pc, Velocity vc, Rotation rc, int id) {
         if (body == null){
             logger.error("ERR: cannot process movement; body == null");
+            lifeCycleMapper.get(id).kill();
             return;
         }
         body.setLinearVelocity(0, 0);
