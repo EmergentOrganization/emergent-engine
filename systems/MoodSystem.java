@@ -6,6 +6,7 @@ import io.github.emergentorganization.cellrpg.events.EntityEvent;
 import io.github.emergentorganization.cellrpg.events.GameEvent;
 import io.github.emergentorganization.cellrpg.managers.EventManager;
 import io.github.emergentorganization.cellrpg.systems.CASystems.CAs.CA;
+import io.github.emergentorganization.cellrpg.systems.CASystems.layers.CALayer;
 import io.github.emergentorganization.emergent2dcore.events.EventListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,8 +37,8 @@ public class MoodSystem extends BaseSystem {
 
     public static final HashMap<String, Integer> CA_INTENSITY_MAP = new HashMap<String, Integer>();
     static {
-        CA_INTENSITY_MAP.put(Tags.CA_VYROIDS_STD,     1);
-        CA_INTENSITY_MAP.put(Tags.CA_VYROIDS_GENETIC, 2);
+        CA_INTENSITY_MAP.put(CALayer.VYROIDS.getTag(),     1);
+        CA_INTENSITY_MAP.put(CALayer.VYROIDS_GENETIC.getTag(), 2);
     }
 
     public MoodSystem(EventManager eventManager){

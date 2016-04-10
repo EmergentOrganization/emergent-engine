@@ -12,6 +12,8 @@ import io.github.emergentorganization.cellrpg.components.*;
 import io.github.emergentorganization.cellrpg.managers.PhysicsSystem;
 import io.github.emergentorganization.cellrpg.tools.profiling.EmergentProfiler;
 import io.github.emergentorganization.emergent2dcore.components.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 @Wire
@@ -25,6 +27,8 @@ public class MovementSystem extends IteratingSystem {
     private ComponentMapper<Rotation> rotMapper;
     private ComponentMapper<Equipment> equipMapper;
     private ComponentMapper<Bounds> boundsMapper;
+
+    private final Logger logger = LogManager.getLogger(getClass());
 
     public MovementSystem() {
         super(Aspect.all(Position.class, Velocity.class));
@@ -67,6 +71,10 @@ public class MovementSystem extends IteratingSystem {
     }
 
     private void processPhysicsMovement(Body body, InputComponent ic, Position pc, Velocity vc, Rotation rc) {
+        if (body == null){
+            logger.error("ERR: cannot process movement; body == null");
+            return;
+        }
         body.setLinearVelocity(0, 0);
 
         // accelerate
