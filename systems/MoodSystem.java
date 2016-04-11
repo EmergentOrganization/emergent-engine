@@ -21,25 +21,27 @@ public class MoodSystem extends BaseSystem {
     private final Logger logger = LogManager.getLogger(getClass());
 
     public int intensity = 0;  // how fast-paced and action packed the current moment is.
-    public static final int MAX_INTENSITY = 10000;
+    public static final int MAX_INTENSITY = 100000;
     // min: 0, max: 1000  (NOTE: max is not enforced, just assumed. going a little over shouldn't break anything.)
     // intensity should be boosted by things like explosions and spawning enemies, intensity decreases over time.
 
     // map of intensity effect of various events
     private static final EnumMap<GameEvent, Integer> EVENT_INTENSITY_MAP = new EnumMap<GameEvent, Integer>(GameEvent.class);
     static {
-        EVENT_INTENSITY_MAP.put(GameEvent.PLAYER_SHOOT, 50);
-        EVENT_INTENSITY_MAP.put(GameEvent.PLAYER_HIT, 300);
-        EVENT_INTENSITY_MAP.put(GameEvent.VYROID_KILL_GENETIC, 100);
-        EVENT_INTENSITY_MAP.put(GameEvent.VYROID_KILL_STD, 100);
-        EVENT_INTENSITY_MAP.put(GameEvent.COLLISION_BULLET, 50);
+        EVENT_INTENSITY_MAP.put(GameEvent.PLAYER_SHOOT, 500);
+        EVENT_INTENSITY_MAP.put(GameEvent.PLAYER_HIT, 3000);
+        EVENT_INTENSITY_MAP.put(GameEvent.VYROID_KILL_GENETIC, 1000);
+        EVENT_INTENSITY_MAP.put(GameEvent.VYROID_KILL_STD, 1000);
+        EVENT_INTENSITY_MAP.put(GameEvent.COLLISION_BULLET, 500);
     }
 
     public static final HashMap<String, Integer> CA_INTENSITY_MAP = new HashMap<String, Integer>();
     static {
-        CA_INTENSITY_MAP.put(CALayer.VYROIDS.getTag(),     1);
-        CA_INTENSITY_MAP.put(CALayer.VYROIDS_GENETIC.getTag(), 2);
+        CA_INTENSITY_MAP.put(CALayer.VYROIDS.getTag()        , 1);
+        CA_INTENSITY_MAP.put(CALayer.VYROIDS_GENETIC.getTag(), 1);
     }
+
+    // TODO: add EntityIntensity_Map
 
     public MoodSystem(EventManager eventManager){
         // add listener for event effects
