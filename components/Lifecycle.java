@@ -1,6 +1,8 @@
 package io.github.emergentorganization.emergent2dcore.components;
 
 import com.artemis.Component;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Required for all entities.
@@ -12,8 +14,11 @@ public class Lifecycle extends Component {
     public float maxPlayerDist = -1f;
     public boolean manualKill = false;  // set this to true to kill the entity
 
+    private final Logger logger = LogManager.getLogger(getClass());
+
     public void kill(){
         // kills the entity
+        logger.info("manually killing entity");
         manualKill = true;
     }
 }
