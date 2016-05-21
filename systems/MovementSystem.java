@@ -37,37 +37,41 @@ public class MovementSystem extends IteratingSystem {
 
     @Override
     protected void process(int entityId) {
-        Position p = posMapper.get(entityId);
-        Rotation r = rotMapper.get(entityId);
-        Velocity v = velMapper.get(entityId);
+        try {
+            Position p = posMapper.get(entityId);
+            Rotation r = rotMapper.get(entityId);
+            Velocity v = velMapper.get(entityId);
 
-        if (physMapper.has(entityId)) {
-            Body body = world.getSystem(PhysicsSystem.class).getBody(entityId);
-            if (inputMapper.has(entityId)) { // control physics body by input
-                processPhysicsMovement(body, inputMapper.get(entityId), p, v, r, entityId);
-            } else { // keep image with body for when physics is acting upon it
-                p.position.set(body.getPosition());
-                r.angle = MathUtils.radiansToDegrees * body.getAngle();
-                v.velocity.set(body.getLinearVelocity());
+            if (physMapper.has(entityId)) {
+                Body body = world.getSystem(PhysicsSystem.class).getBody(entityId);
+                if (inputMapper.has(entityId)) { // control physics body by input
+                    processPhysicsMovement(body, inputMapper.get(entityId), p, v, r, entityId);
+                } else { // keep image with body for when physics is acting upon it
+                    p.position.set(body.getPosition());
+                    r.angle = MathUtils.radiansToDegrees * body.getAngle();
+                    v.velocity.set(body.getLinearVelocity());
+                }
+            } else { // move image directly since there is no physics body
+                float d = world.getDelta();
+                p.position.add(v.velocity.x * d, v.velocity.y * d);
             }
-        } else { // move image directly since there is no physics body
-            float d = world.getDelta();
-            p.position.add(v.velocity.x * d, v.velocity.y * d);
-        }
 
-        // Keep equipment with entity
-        if (equipMapper.has(entityId)) {
-            Equipment equipment = equipMapper.get(entityId);
-            if (equipment.shieldEntity >= 0) {
-                Bounds shieldBounds = boundsMapper.get(equipment.shieldEntity);
-                Bounds ownerBounds = boundsMapper.get(entityId);
-                posMapper.get(equipment.shieldEntity)
-                        .position.set(p.position)
-                        .sub(
-                                shieldBounds.width * 0.5f - ownerBounds.width * 0.5f,
-                                shieldBounds.height * 0.5f - ownerBounds.height * 0.5f
-                        );
+            // Keep equipment with entity
+            if (equipMapper.has(entityId)) {
+                Equipment equipment = equipMapper.get(entityId);
+                if (equipment.shieldEntity >= 0) {
+                    Bounds shieldBounds = boundsMapper.get(equipment.shieldEntity);
+                    Bounds ownerBounds = boundsMapper.get(entityId);
+                    posMapper.get(equipment.shieldEntity)
+                            .position.set(p.position)
+                            .sub(
+                                    shieldBounds.width * 0.5f - ownerBounds.width * 0.5f,
+                                    shieldBounds.height * 0.5f - ownerBounds.height * 0.5f
+                            );
+                }
             }
+        } catch (NullPointerException ex){
+            logger.error("MoveSys error ", ex);
         }
     }
 
