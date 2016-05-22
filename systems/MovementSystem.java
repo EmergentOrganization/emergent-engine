@@ -71,7 +71,8 @@ public class MovementSystem extends IteratingSystem {
                 }
             }
         } catch (NullPointerException ex){
-            logger.error("MoveSys error ", ex);
+            logger.error("MoveSys error; killing offending entity #"+entityId, ex);
+            world.getEntity(entityId).getComponent(Lifecycle.class).kill();
         }
     }
 
