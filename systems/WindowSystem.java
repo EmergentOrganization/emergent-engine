@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
+import io.github.emergentorganization.cellrpg.PixelonTransmission;
 import io.github.emergentorganization.cellrpg.scenes.SceneManager;
 import io.github.emergentorganization.cellrpg.scenes.game.menu.pause.PauseWindow;
 import com.kotcrab.vis.ui.widget.VisWindow;
@@ -27,8 +28,10 @@ public class WindowSystem extends BaseSystem {
     private boolean isPaused = false;
     private VisWindow pauseWindow;
     private TextureRegion framebufferTexture;
+    PixelonTransmission pt;
 
-    public WindowSystem(Stage stage, Batch batch, SceneManager sceneManager) {
+    public WindowSystem(PixelonTransmission pt, Stage stage, Batch batch, SceneManager sceneManager) {
+        this.pt = pt;
         this.stage = stage;
         this.gameBatch = batch;
         this.sceneManager = sceneManager;
@@ -36,7 +39,7 @@ public class WindowSystem extends BaseSystem {
 
     @Override
     protected void initialize() {
-        this.pauseWindow = new PauseWindow(stage, sceneManager, world);
+        this.pauseWindow = new PauseWindow(pt, stage, sceneManager, world);
     }
 
     @Override
