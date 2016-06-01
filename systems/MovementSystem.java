@@ -25,7 +25,7 @@ public class MovementSystem extends IteratingSystem {
     private ComponentMapper<PhysicsBody> physMapper;
     private ComponentMapper<InputComponent> inputMapper;
     private ComponentMapper<Rotation> rotMapper;
-    private ComponentMapper<Equipment> equipMapper;
+    private ComponentMapper<EquipmentList> equipMapper;
     private ComponentMapper<Bounds> boundsMapper;
     private ComponentMapper<Lifecycle> lifeCycleMapper;
 
@@ -58,17 +58,9 @@ public class MovementSystem extends IteratingSystem {
 
             // Keep equipment with entity
             if (equipMapper.has(entityId)) {
-                Equipment equipment = equipMapper.get(entityId);
-                if (equipment.shieldEntity >= 0) {
-                    Bounds shieldBounds = boundsMapper.get(equipment.shieldEntity);
-                    Bounds ownerBounds = boundsMapper.get(entityId);
-                    posMapper.get(equipment.shieldEntity)
-                            .position.set(p.position)
-                            .sub(
-                                    shieldBounds.width * 0.5f - ownerBounds.width * 0.5f,
-                                    shieldBounds.height * 0.5f - ownerBounds.height * 0.5f
-                            );
-                }
+                EquipmentList equipmentList = equipMapper.get(entityId);
+                equipmentList.moveEquipment(entityId, boundsMapper, posMapper);
+                equipmentList.rechargeEquipment(); // TODO: move this to EnergySystem
             }
         } catch (NullPointerException ex){
             logger.error("MoveSys error; killing offending entity #"+entityId, ex);
