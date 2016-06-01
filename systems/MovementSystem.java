@@ -59,7 +59,7 @@ public class MovementSystem extends IteratingSystem {
             // Keep equipment with entity
             if (equipMapper.has(entityId)) {
                 EquipmentList equipmentList = equipMapper.get(entityId);
-                equipmentList.moveEquipment(entityId, boundsMapper, posMapper);
+                equipmentList.moveEquipment(boundsMapper, posMapper);
                 equipmentList.rechargeEquipment(); // TODO: move this to EnergySystem
             }
         } catch (NullPointerException ex){
