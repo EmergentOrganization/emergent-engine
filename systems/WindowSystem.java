@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.emergentorganization.cellrpg.PixelonTransmission;
-import io.github.emergentorganization.cellrpg.scenes.SceneManager;
 import io.github.emergentorganization.cellrpg.scenes.game.menu.pause.PauseWindow;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.github.emergentorganization.cellrpg.tools.profiling.EmergentProfiler;
@@ -21,25 +20,23 @@ import io.github.emergentorganization.cellrpg.tools.profiling.EmergentProfiler;
 public class WindowSystem extends BaseSystem {
     private final Stage stage;
     private final Batch gameBatch;
-    SceneManager sceneManager;
     private RenderSystem renderSystem;
     private MovementSystem movementSystem;
     private InputSystem inputSystem;
     private boolean isPaused = false;
     private VisWindow pauseWindow;
     private TextureRegion framebufferTexture;
-    PixelonTransmission pt;
+    private final PixelonTransmission pt;
 
-    public WindowSystem(PixelonTransmission pt, Stage stage, Batch batch, SceneManager sceneManager) {
+    public WindowSystem(PixelonTransmission pt, Stage stage, Batch batch) {
         this.pt = pt;
         this.stage = stage;
         this.gameBatch = batch;
-        this.sceneManager = sceneManager;
     }
 
     @Override
     protected void initialize() {
-        this.pauseWindow = new PauseWindow(pt, stage, sceneManager, world);
+        this.pauseWindow = new PauseWindow(pt, stage, world);
     }
 
     @Override

@@ -29,6 +29,8 @@ public class MovementSystem extends IteratingSystem {
     private ComponentMapper<Bounds> boundsMapper;
     private ComponentMapper<Lifecycle> lifeCycleMapper;
 
+    private final Logger logger = LogManager.getLogger(getClass());
+
     public MovementSystem() {
         super(Aspect.all(Position.class, Velocity.class));
     }
@@ -58,6 +60,7 @@ public class MovementSystem extends IteratingSystem {
             if (equipMapper.has(entityId)) {
                 EquipmentList equipmentList = equipMapper.get(entityId);
                 equipmentList.moveEquipment(boundsMapper, posMapper);
+                equipmentList.rechargeEquipment(); // TODO: move this to EnergySystem
             }
         } catch (NullPointerException ex){
             logger.error("MoveSys error; killing offending entity #"+entityId, ex);
@@ -82,6 +85,4 @@ public class MovementSystem extends IteratingSystem {
         vc.velocity.set(body.getLinearVelocity());
         rc.angle = MathUtils.radiansToDegrees * body.getAngle();
     }
-
-    private final Logger logger = LogManager.getLogger(getClass());
 }
